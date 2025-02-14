@@ -30,7 +30,7 @@ services:
     build:
       # Dockerfile 경로
       context: ./api
-      
+
       # BuildKit 캐시 설정
       # 캐시 불러올 폴더
       cache_from:
@@ -66,6 +66,8 @@ services:
 
       dockerfile: Dockerfile
     image: wag192625/client:latest
+    environment:
+      DATABASE_HOST: db
     ports:
       - '80:80'
       - '443:443'
@@ -73,6 +75,10 @@ services:
       - api-network
     env_file:
       - .env
+    volumes:
+      - /etc/letsencrypt/live/43.201.48.145.sslip.io/fullchain.pem:/etc/letsencrypt/live/43.201.48.145.sslip.io/fullchain.pem:ro
+      - /etc/letsencrypt/live/43.201.48.145.sslip.io/privkey.pem:/etc/letsencrypt/live/43.201.48.145.sslip.io/privkey.pem:ro
+
     depends_on:
       - db
       - api
@@ -84,7 +90,6 @@ volumes:
 networks:
   db-network:
   api-network:
-
 # docker compose의 역할
 # 컨테이너를 생성 실행 관리
-# 컨테이너를 
+# 컨테이너를
