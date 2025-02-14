@@ -5,11 +5,11 @@ on:
     branches:
       - main
     paths:
-      - ".github/workflows/workflow.yml"
-      - "docker-compose.yml"
-      - "Dockerfile"
-      - "api/**"
-      - "client/**"
+      - '.github/workflows/workflow.yml'
+      - 'docker-compose.yml'
+      - 'Dockerfile'
+      - 'api/**'
+      - 'client/**'
 
 jobs:
   ssh-agent: # Job 이름
@@ -19,14 +19,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      ########################
+
       # 캐시 저장 설정을 위한 action(라이브러리)
       - name: Cache Docker Image Layer
         # actions/cache : 깃허브 캐시 저장소 활용을 위한 라이브러리
         uses: actions/cache@v4.2.0
         with:
-          path: /tmp/.buildx-cache
-          key: docker-image-layer-cache-$${{ github.sha }}
-          restore-keys: docker-image-layer-cache-
+          path: /tmp/.buildx-cache # 캐시로 관리할 경로
+          key: docker-image-layer-cache-$${{ github.sha }} # 불러올 캐시 이름(식별자)
+          restore-keys: docker-image-layer-cache- # 만약 캐시 key를 찾지 못하면 대체할 캐시 key 패턴
+
+      ########################
 
       - name: run ssh-agent
         uses: webfactory/ssh-agent@v0.9.0
@@ -38,7 +42,6 @@ jobs:
       # port를 변경했기 때문에 -p {{ secrets.SSH_PORT }} 입력한 것
       - name: Add Remote Server Fingerprint to Known Hosts
         run: ssh-keyscan -H -p ${{ secrets.SSH_PORT }} ${{ secrets.SSH_HOST}} >> ~/.ssh/known_hosts || true
-
 
       - name: Create .env file
         run: |
@@ -53,8 +56,7 @@ jobs:
         # echo "DOMAIN=${{secrets.DOMAIN}}" >> .env
         # echo "API_URL=${{secrets.API_URL}}" >> .env
 
-
-###########################
+      ###########################
 
       # 도커 Buildkit 엔진 설정 action(라이브러리)
       - name: Set up Docker Buildkit
@@ -69,18 +71,17 @@ jobs:
         # 1. buildkit 빌더를 생성하는 명령어
         # 2. 빌더(buildkit) 설정 명령어
         run: |
-          docker buildx create --use --name buildkit
+          docker buildx create --use --name buildkit-builder
           docker buildx use buildkit
 
-
-###########################
+      ###########################
 
       - name: Login DockerHub
         run: echo '${{ secrets.DOCKER_PASSWORD}}' | docker login -u '${{ secrets.DOCKER_USERNAME }}' --password-stdin
 
       # docker 이미지 빌드
       - name: Docker Image Build
-        run: docker compose -f docker-compose.yml build
+        run: docker compose -f docker-compose.yml build --build-arg BUILDKIT_INLINE_CACHE=1
 
       # docker 이미지 푸시
       - name: Docker Image Push
@@ -109,4 +110,4 @@ jobs:
             docker compose -f docker-compose.yml pull
             docker compose -f docker-compose.yml down
             docker compose -f docker-compose.yml up -d
-            docker image prune -f
+            docker system prune -f
