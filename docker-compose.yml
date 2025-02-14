@@ -71,13 +71,14 @@ services:
     ports:
       - '80:80'
       - '443:443'
+    volumes:
+      - /etc/letsencrypt/live/43.201.48.145.sslip.io/fullchain.pem:/etc/letsencrypt/live/43.201.48.145.sslip.io/fullchain.pem:ro
+      - /etc/letsencrypt/live/43.201.48.145.sslip.io/privkey.pem:/etc/letsencrypt/live/43.201.48.145.sslip.io/privkey.pem:ro
+
     networks:
       - api-network
     env_file:
       - .env
-    volumes:
-      - /etc/letsencrypt/live/43.201.48.145.sslip.io/fullchain.pem:/etc/letsencrypt/live/43.201.48.145.sslip.io/fullchain.pem:ro
-      - /etc/letsencrypt/live/43.201.48.145.sslip.io/privkey.pem:/etc/letsencrypt/live/43.201.48.145.sslip.io/privkey.pem:ro
 
     depends_on:
       - db
