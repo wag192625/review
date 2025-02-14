@@ -71,7 +71,7 @@ jobs:
         # 1. buildkit 빌더를 생성하는 명령어
         # 2. 빌더(buildkit) 설정 명령어
         run: |
-          docker buildx create --use --name buildkit-builder
+          docker buildx create --use --name buildkit
           docker buildx use buildkit
 
       ###########################
@@ -97,7 +97,6 @@ jobs:
           source: 'docker-compose.yml,.env'
           target: '~/github-actions-work-directory'
 
-          
       # 원격 서버에서 Docker 컨테이너 실행
       - name: Pull Image & Up Container
         uses: appleboy/ssh-action@v1.0.3
